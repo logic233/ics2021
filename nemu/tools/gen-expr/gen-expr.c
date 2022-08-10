@@ -17,7 +17,31 @@ static char *code_format =
 "}";
 
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  // buf[0] = '\0';
+  int choose = rand();
+  int num;
+  char *op_list[4]={"+","-","*","/"};
+  // printf("%d\n",choose);
+  if(strlen(buf)>40){
+    choose = 0;
+  }
+ switch (choose%5) {
+   case 0:
+    num = rand() % 100;
+     sprintf(buf + strlen(buf), "%d", num);
+     return;
+   case 1:
+     sprintf(buf + strlen(buf), "(");
+     gen_rand_expr();
+     sprintf(buf + strlen(buf), ")");
+     return;
+   default:
+     gen_rand_expr();
+     sprintf(buf + strlen(buf), "%s", op_list[rand()%4]);
+     gen_rand_expr();
+     return;
+  }
+  return;
 }
 
 int main(int argc, char *argv[]) {
@@ -29,6 +53,7 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    memset(buf,0,sizeof(buf));
     gen_rand_expr();
 
     sprintf(code_buf, code_format, buf);
