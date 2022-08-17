@@ -13,6 +13,11 @@ def_EHelper(blt) {
     rtl_j(s, cpu.pc+id_dest->imm);
   }
 }
+def_EHelper(bltu) {
+    if(*dsrc1<*dsrc2){
+    rtl_j(s, cpu.pc+id_dest->imm);
+  }
+}
 def_EHelper(bge) {
     if((sword_t)*dsrc1>=(sword_t)*dsrc2){
     rtl_j(s, cpu.pc+id_dest->imm);
