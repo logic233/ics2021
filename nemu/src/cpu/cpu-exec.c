@@ -22,10 +22,25 @@ void device_update();
 void fetch_decode(Decode *s, vaddr_t pc);
 bool scan_wp();
 
-static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) log_write("%s\n", _this->logbuf);
+#define iringbuf_size 5
+char iringbuf[iringbuf_size][128];
+int iringbuf_it = 0;
 #endif
+
+static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
+
+#ifdef CONFIG_ITRACE_COND
+  if (ITRACE_COND) {
+    log_write("%s\n--------------\n", _this->logbuf);
+  }
+  strcpy(iringbuf[iringbuf_it], _this->logbuf);
+  iringbuf_it = (iringbuf_it + 1) % iringbuf_size;
+#endif
+
+// #ifdef CONFIG_MTRACE
+//   puts("CONFIG_MTRACE is ok");
+// #endif
   if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
   IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
 
@@ -105,7 +120,34 @@ void cpu_exec(uint64_t n) {
     fetch_decode_exec_updatepc(&s);
     g_nr_guest_instr ++;
     trace_and_difftest(&s, cpu.pc);
-    if (nemu_state.state != NEMU_RUNNING) break;
+    if (nemu_state.state != NEMU_RUNNING) {
+#ifdef CONFIG_ITRACE_COND
+      switch (nemu_state.state)
+      {
+        case NEMU_STOP:
+          printf("[NEMU_STOP] ");
+          break;
+        case NEMU_END:
+          printf("[NEMU_END]  ");
+          break;
+        case NEMU_ABORT:
+          printf("[NEMU_ABORT]");
+          break;
+        case NEMU_QUIT:
+          printf("[NEMU_QUIT] ");
+          break;
+      }
+      puts("###### iringbuf ##################");
+      for (int i = iringbuf_it; i < iringbuf_size; i++) {
+        printf("%s\n", iringbuf[i]);
+      }
+      for (int i = 0; i < iringbuf_it; i++) {
+        printf("%s\n", iringbuf[i]);
+      }
+      puts("##############################################");
+#endif
+      break;
+    }
     IFDEF(CONFIG_DEVICE, device_update());
   }
 
