@@ -23,6 +23,10 @@ int get_sym_func(const char *elf_src, Elf_func *sym_func) {
   int n_sym = 0;
   int n_sym_func = 0;
   fp = fopen(elf_src, "r");
+  if(fp == NULL){
+    Log("no elf file.");
+    return 0;
+  }
   int ret = fread(&head, sizeof(Elf32_Ehdr), 1, fp);
   assert(ret == 1);
 

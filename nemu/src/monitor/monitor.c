@@ -34,11 +34,13 @@ void sdb_set_batch_mode();
 static char *log_file = NULL;
 static char *diff_so_file = NULL;
 static char *img_file = NULL;
-static char *elf_file = NULL;
 static int difftest_port = 1234;
+#ifdef CONFIG_FTRACE
 Elf_func sym_func[200];
 int n_sym_func = 0;
 int level = 0;
+static char *elf_file = NULL;
+#endif
 static long load_img() {
   if (img_file == NULL) {
     Log("No image is given. Use the default build-in image.");
@@ -61,6 +63,7 @@ static long load_img() {
   return size;
 }
 
+#ifdef CONFIG_FTRACE
 int check_func_byElf(rtlreg_t dest) {
   for (int i = 0; i < n_sym_func; i++) {
     if (dest >= sym_func[i].start &&
@@ -80,6 +83,10 @@ int check_func_byElf(rtlreg_t dest) {
 
 static int load_elf(Elf_func *sym_func) {
   elf_file = img_file;
+  if(elf_file==NULL){
+    Log("no elf file.");
+    return 0;
+  }
   int len = strlen(elf_file);
   elf_file[len - 3] = 'e';
   elf_file[len - 2] = 'l';
@@ -89,7 +96,7 @@ static int load_elf(Elf_func *sym_func) {
 
   return n;
 }
-
+#endif
 static int parse_args(int argc, char *argv[]) {
   const struct option table[] = {
       {"batch", no_argument, NULL, 'b'},
