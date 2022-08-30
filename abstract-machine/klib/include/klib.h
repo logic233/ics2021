@@ -31,6 +31,7 @@ void   free      (void *ptr);
 int    abs       (int x);
 int    atoi      (const char *nptr);
 void itoa(unsigned int n, char *buf);
+void ltoa(unsigned long n, char *buf);
 void xtoa(unsigned int n, char *buf);
 
 // stdio.h

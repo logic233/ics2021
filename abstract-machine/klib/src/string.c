@@ -18,6 +18,7 @@ char *strcpy(char *dst, const char *src) {
     *q = *p;
     q++;
   }
+  *q='\0';
   return dst;
 }
 
@@ -33,6 +34,7 @@ char *strncpy(char *dst, const char *src, size_t n) {
     q++;
     n--;
   }
+  *q='\0';
   return dst;
 }
 

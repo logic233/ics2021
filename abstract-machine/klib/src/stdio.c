@@ -4,15 +4,6 @@
 #include <stdarg.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
-
-int printf(const char *fmt, ...) {
-  panic("Not implemented");
-}
-
-int vsprintf(char *out, const char *fmt, va_list ap) {
-  panic("Not implemented");
-}
-
 int isDigit(unsigned char c)
 {
     if (c >= '0' && c <= '9')
@@ -20,12 +11,24 @@ int isDigit(unsigned char c)
     else
         return 0;
 }
-int sprintf(char *out, const char *fmt, ...) {
-   int count = 0;
-//     char c;
+
+int printf(const char *fmt, ...) {
+    va_list ap;
+    char s[2000];
+    int n;
+
+    va_start(ap,fmt);
+    n = vsprintf(s, fmt, ap);
+    putstr(s);
+    return n;
+}
+
+int vsprintf(char *out, const char *fmt, va_list ap) {
+    int count = 0;
+    char c;
     char *s;
     int n;
-    
+    uint64_t un;
 //     int index = 0;
 //     int ret = 2;
     
@@ -36,10 +39,6 @@ int sprintf(char *out, const char *fmt, ...) {
     
     memset(buf, 0, sizeof(buf));
     memset(digit, 0, sizeof(digit));
-
-    va_list ap;
-    
-    va_start(ap, fmt);
     
     while(*fmt != '\0')
     {
@@ -62,14 +61,34 @@ int sprintf(char *out, const char *fmt, ...) {
                         memcpy(out, buf, strlen(buf));
                         out += strlen(buf);
                         break;
+                }
+                case 'u':
+                {
+                        un = va_arg(ap, uint32_t);
+                        itoa(un, buf);
+                        memcpy(out, buf, strlen(buf));
+                        out += strlen(buf);
+                        break;                    
+                }
+                case 'l':
+                {
+                    fmt++;
+                        if(*fmt == 'u'){
+                          un = va_arg(ap, uint64_t);
+                          ltoa(un, buf);
+                          memcpy(out, buf, strlen(buf));
+                          out += strlen(buf);
+                          break;
+                        }
+                        
                 }    
-                // case 'c': /*字符型*/
-                // {
-                //         c = va_arg(ap, int);
-                //         *out = c;
-                //         out++;
-                //         break;
-                // }
+                case 'c': /*字符型*/
+                {
+                        c = va_arg(ap, int);
+                        *out = c;
+                        out++;
+                        break;
+                }
                 // case 'x': /*16进制*/
                 // {
                 //         n = va_arg(ap, int);
@@ -196,6 +215,13 @@ int sprintf(char *out, const char *fmt, ...) {
     va_end(ap);
 
     return count;
+}
+
+
+int sprintf(char *out, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap,fmt);
+    return vsprintf(out, fmt, ap);
 }
 
 

@@ -1,4 +1,6 @@
+#ifdef CONFIG_FTRACE
 int check_func_byElf(rtlreg_t dest);
+#endif
 
 def_EHelper(beq) {
   if(*dsrc1==*dsrc2){
@@ -25,7 +27,11 @@ def_EHelper(bge) {
     rtl_j(s, cpu.pc+id_dest->imm);
   }
 }
-
+def_EHelper(bgeu) {
+    if(*dsrc1>=*dsrc2){
+    rtl_j(s, cpu.pc+id_dest->imm);
+  }
+}
 
 
 def_EHelper(jal) {
